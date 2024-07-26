@@ -7,15 +7,22 @@ publish = false
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies.xxhash-rust]
-version = "0.8.4"
+version = "0.8.12"
+#path = "../xxhash-rust/"
 features = ["xxh32", "const_xxh32", "xxh64", "const_xxh64", "xxh3", "const_xxh3"]
 
 [dependencies]
 getrandom = "0"
+get-random-const = "2"
+
 xxhash-c-sys = "0.8"
 quickcheck = "1"
 quickcheck_macros = "1"
-criterion = "0.3"
+criterion = "0.5"
+
+[[bench]]
+name = "bench"
+harness = false
 
 # Default release mode in Rust
 [profile.dev]
@@ -27,6 +34,16 @@ lto = false
 panic = 'unwind'
 incremental = false
 codegen-units = 16
+rpath = false
+
+[profile.bench]
+opt-level = 3
+debug = false
+debug-assertions = false
+overflow-checks = false
+lto = true
+incremental = false
+codegen-units = 1
 rpath = false
 
 # My preferable build with lto and optimized for size
