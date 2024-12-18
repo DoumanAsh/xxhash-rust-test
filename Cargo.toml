@@ -16,6 +16,7 @@ getrandom = "0"
 get-random-const = "2"
 
 xxhash-c-sys = "0.8"
+twox-hash = "2.1"
 quickcheck = "1"
 quickcheck_macros = "1"
 criterion = "0.5"

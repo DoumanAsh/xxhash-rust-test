@@ -19,31 +19,31 @@ const DATA: [&[u8]; 12] = [
 
 fn against_c(c: &mut Criterion) {
     c.bench_function("xxh32 Rust", |b| b.iter_batched(|| &DATA, |data| for input in data {
-        xxhash_rust::xxh32::xxh32(black_box(input), black_box(0));
+        black_box(xxhash_rust::xxh32::xxh32(input, 0));
     }, criterion::BatchSize::SmallInput));
 
     c.bench_function("const_xxh32 Rust", |b| b.iter_batched(|| &DATA, |data| for input in data {
-        xxhash_rust::const_xxh32::xxh32(black_box(input), black_box(0));
+        black_box(xxhash_rust::const_xxh32::xxh32(input, 0));
     }, criterion::BatchSize::SmallInput));
 
     c.bench_function("xxh32 Rust Stateful", |b| b.iter_batched(|| &DATA, |data| for input in data {
         let mut hasher = xxhash_rust::xxh32::Xxh32::new(0);
         hasher.update(black_box(input));
-        hasher.digest();
+        black_box(hasher.digest());
     }, criterion::BatchSize::SmallInput));
 
     c.bench_function("xxh64 Rust", |b| b.iter_batched(|| &DATA, |data| for input in data {
-        xxhash_rust::xxh64::xxh64(black_box(input), black_box(0));
+        black_box(xxhash_rust::xxh64::xxh64(input, 0));
     }, criterion::BatchSize::SmallInput));
 
     c.bench_function("xxh64 Rust Stateful", |b| b.iter_batched(|| &DATA, |data| for input in data {
         let mut hasher = xxhash_rust::xxh64::Xxh64::new(0);
         hasher.update(black_box(input));
-        hasher.digest();
+        black_box(hasher.digest());
     }, criterion::BatchSize::SmallInput));
 
     c.bench_function("const_xxh64 Rust", |b| b.iter_batched(|| &DATA, |data| for input in data {
-        xxhash_rust::const_xxh64::xxh64(black_box(input), black_box(0));
+        black_box(xxhash_rust::const_xxh64::xxh64(input, 0));
     }, criterion::BatchSize::SmallInput));
 
     c.bench_function("xxh32 C", |b| b.iter_batched(|| &DATA, |data| for input in data {
@@ -83,13 +83,25 @@ fn against_c(c: &mut Criterion) {
     }, criterion::BatchSize::SmallInput));
 
     c.bench_function("xxh3_64 Rust", |b| b.iter_batched(|| &DATA, |data| for input in data {
-        xxhash_rust::xxh3::xxh3_64(black_box(input));
+        black_box(xxhash_rust::xxh3::xxh3_64(input));
     }, criterion::BatchSize::SmallInput));
 
     c.bench_function("xxh3_64 Rust Stateful", move |b| b.iter_batched(move || &DATA, |data| for input in data {
         let mut hasher = xxhash_rust::xxh3::Xxh3::new();
         hasher.update(black_box(input));
         black_box(hasher.digest());
+    }, criterion::BatchSize::SmallInput));
+
+    c.bench_function("twox-hash xxh3_64 Rust", |b| b.iter_batched(|| &DATA, |data| for input in data {
+        black_box(twox_hash::XxHash3_64::oneshot(input));
+    }, criterion::BatchSize::SmallInput));
+
+    c.bench_function("twox-hash xxh3_64 Rust Stateful", move |b| b.iter_batched(move || &DATA, |data| for input in data {
+        use core::hash::Hasher;
+
+        let mut hasher = twox_hash::XxHash3_64::new();
+        hasher.write(black_box(input));
+        black_box(hasher.finish());
     }, criterion::BatchSize::SmallInput));
 
     c.bench_function("xxh3_64 Rust Default Stateful", move |b| b.iter_batched(move || &DATA, |data| for input in data {
@@ -99,7 +111,7 @@ fn against_c(c: &mut Criterion) {
     }, criterion::BatchSize::SmallInput));
 
     c.bench_function("xxh3_128 Rust", |b| b.iter_batched(|| &DATA, |data| for input in data {
-        xxhash_rust::xxh3::xxh3_128(black_box(input));
+        black_box(xxhash_rust::xxh3::xxh3_128(input));
     }, criterion::BatchSize::SmallInput));
 
     c.bench_function("xxh3_128 Rust Stateful", move |b| b.iter_batched(move || &DATA, |data| for input in data {
@@ -108,18 +120,20 @@ fn against_c(c: &mut Criterion) {
         black_box(hasher.digest128());
     }, criterion::BatchSize::SmallInput));
 
+    c.bench_function("twox-hash xxh3_128 Rust", |b| b.iter_batched(|| &DATA, |data| for input in data {
+        black_box(twox_hash::XxHash3_128::oneshot(input));
+    }, criterion::BatchSize::SmallInput));
+
+    c.bench_function("twox-hash xxh3_128 Rust Stateful", move |b| b.iter_batched(move || &DATA, |data| for input in data {
+        let mut hasher = twox_hash::XxHash3_128::new();
+        hasher.write(black_box(input));
+        black_box(hasher.finish_128());
+    }, criterion::BatchSize::SmallInput));
+
     c.bench_function("xxh3_128 Rust Default Stateful", move |b| b.iter_batched(move || &DATA, |data| for input in data {
         let mut hasher = xxhash_rust::xxh3::Xxh3Default::new();
         hasher.update(black_box(input));
         black_box(hasher.digest128());
-    }, criterion::BatchSize::SmallInput));
-
-    c.bench_function("const_xxh3 64 Rust", |b| b.iter_batched(|| &DATA, |data| for input in data {
-        xxhash_rust::const_xxh3::xxh3_64(black_box(input));
-    }, criterion::BatchSize::SmallInput));
-
-    c.bench_function("const_xxh3 128 Rust", |b| b.iter_batched(|| &DATA, |data| for input in data {
-        xxhash_rust::const_xxh3::xxh3_128(black_box(input));
     }, criterion::BatchSize::SmallInput));
 
     c.bench_function("xxh3_64 C Stateful", |b| b.iter_batched(|| &DATA, |data| for input in data {
@@ -144,6 +158,14 @@ fn against_c(c: &mut Criterion) {
         unsafe {
             xxhash_c_sys::XXH3_128bits(input.as_ptr() as _, input.len());
         }
+    }, criterion::BatchSize::SmallInput));
+
+    c.bench_function("const_xxh3 64 Rust", |b| b.iter_batched(|| &DATA, |data| for input in data {
+        black_box(xxhash_rust::const_xxh3::xxh3_64(input));
+    }, criterion::BatchSize::SmallInput));
+
+    c.bench_function("const_xxh3 128 Rust", |b| b.iter_batched(|| &DATA, |data| for input in data {
+        black_box(xxhash_rust::const_xxh3::xxh3_128(input));
     }, criterion::BatchSize::SmallInput));
 }
 
