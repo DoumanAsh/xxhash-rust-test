@@ -7,7 +7,7 @@ publish = false
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies.xxhash-rust]
-version = "0.8.12"
+version = "0.8.13"
 #path = "../xxhash-rust/"
 features = ["xxh32", "const_xxh32", "xxh64", "const_xxh64", "xxh3", "const_xxh3"]
 
@@ -15,11 +15,13 @@ features = ["xxh32", "const_xxh32", "xxh64", "const_xxh64", "xxh3", "const_xxh3"
 getrandom = "0"
 get-random-const = "2"
 
-xxhash-c-sys = "0.8"
+xxhash-c-sys = "0.8.2"
 twox-hash = "2.1"
-quickcheck = "1"
-quickcheck_macros = "1"
-criterion = "0.5"
+
+[dependencies.criterion]
+git = "https://github.com/bheisler/criterion.rs.git"
+#version = "0.5"
+features = ["html_reports", "cargo_bench_support", "plotters"]
 
 [[bench]]
 name = "bench"
@@ -39,6 +41,8 @@ rpath = false
 
 [profile.bench]
 opt-level = 3
+# My preferable build with lto and optimized for size
+#opt-level = "z"
 debug = false
 debug-assertions = false
 overflow-checks = false
@@ -47,9 +51,16 @@ incremental = false
 codegen-units = 1
 rpath = false
 
-# My preferable build with lto and optimized for size
 [profile.release]
+opt-level = 3
+# My preferable build with lto and optimized for size
+#opt-level = "z"
+debug = false
+debug-assertions = false
+overflow-checks = false
 lto = true
-opt-level = "z"
 incremental = false
 codegen-units = 1
+rpath = false
+
+
